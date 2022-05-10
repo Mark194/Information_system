@@ -38,23 +38,24 @@ var
   currentUser: AuthData;
   isAuth: boolean;
   tables: array of Table;
+  userList: Users;
 
 function actionConfirmed(message: string): boolean;
 var
   value: string;
 begin
   Write(message);
-  Read(value);
+  Readln(value);
   Result := value = 'Да';
 end;
 
-function indexConfirmed(message: string; mas: System.Array) : integer;
+function indexConfirmed(message: string; mas: System.Array): integer;
 var
   temp: integer;
   line: string;
   code: integer;
 begin
-   
+  code := 0;
   repeat
     write('  ', message);
     Readln(line);
@@ -66,7 +67,7 @@ begin
   Result := temp;
 end;
 
-function selectOperation(min: integer; max: integer) : integer;
+function selectOperation(min: integer; max: integer): integer;
 var
   temp: integer;
   line: string;
@@ -85,8 +86,8 @@ end;
 
 procedure comeBack;
 var
-  temp  : integer;
-  code  : integer;
+  temp: integer;
+  code: integer;
   answer: string;
 begin
   write('  Возврат - 0 ');
@@ -137,11 +138,11 @@ begin
   table.data := new StrArray[fileTable.countColumn];
   
   for var i := 0 to fileTable.countColumn - 1 do
+  begin
     table.data[i].value := new str[fileTable.countRow];
-  
-  for var i := 0 to fileTable.countColumn - 1 do
     for var j := 0 to fileTable.countRow - 1 do
       table.data[i].value[j] := fileTable.data[i][j];
+  end;
   Result := table;
 end;
 
@@ -216,7 +217,6 @@ var
   Ind: Integer;
 begin
   size := Length(current) - 1;
-  Writeln(size);
   if Index > size then
   begin
     Writeln('Указанный элемент не существует');
@@ -241,7 +241,6 @@ var
   I, Ind: Integer;
 begin
   size := Length(current.value) - 1;
-  Writeln(size);
   if Index > size {Length(V) - 1} then
   begin
     Writeln('Указанный элемент не существует');
@@ -262,15 +261,13 @@ end;
 
 function isAuthSuccess(login, pass: string): boolean;
 var
-  users: Users;
   user: AuthData;
   i: integer;
 begin
-  users := readAuthData();
   Result := false;
   for i := 0 to countUsers do
   begin
-    user := users[i];
+    user := userList[i];
     if ((user.login = login) and (user.pass = pass)) then
     begin
       Result := true;
@@ -434,9 +431,9 @@ end;
 
 procedure viewTable();
 var
-  current : Table;
-  oper    : integer;
-  num     : integer;
+  current: Table;
+  oper: integer;
+  num: integer;
 begin
   num := indexConfirmed('Выберите № таблицы: ', tables);
   
@@ -464,21 +461,15 @@ var
   isDigit: boolean;
 
 begin
-  if current.data = nil
-    then
-    current.data := new StrArray[0];
-  
   last := Length(current.data);
   
   SetLength(current.data, last + 1);
   
-  if last <> 0 then
-  begin
-    var len := Length(current.data[0].value);
-    current.data[last].value := new str[len];
-    isDigit := actionConfirmed('Тип столбца числовой? (Да/Нет)');
-    current.data[last].isDigit := isDigit;
-  end;
+  var len := Length(current.data[0].value);
+  current.data[last].value := new str[len];
+  isDigit := actionConfirmed('Тип столбца числовой? (Да/Нет)');
+  current.data[last].isDigit := isDigit;
+  
   Result := current;
 end;
 
@@ -504,11 +495,12 @@ function addRow(current: Table): Table;
 var
   last: integer;
 begin
-  if current.data = nil then
+  if Length(current.data) = 0 then
   begin
     Result := current;
     exit;
   end;
+  
   last := Length(current.data[0].value);
   for var i := 0 to Length(current.data) - 1 do
     SetLength(current.data[i].value, last + 1);
@@ -519,9 +511,8 @@ end;
 function delRow(current: Table): Table;
 var
   num: integer;
-  answer: string[3];
 begin
-  if current.data = nil then
+  if Length(current.data) = 0 then
   begin
     Result := current;
     exit;
@@ -606,7 +597,7 @@ begin
   
   
   for var i := 0 to Length(arr[0].value) - 1 do 
-    for var j := 0 to Length(arr[0].value) - i - 1 do 
+    for var j := i + 1 to Length(arr[0].value) - i - 1 do 
     begin
       write(i, j, ' ');
       if (a[k].value[i] < a[k].value[j]) then
@@ -633,7 +624,7 @@ begin
   
   
   for var i := 0 to Length(arr[0].value) - 1 do 
-    for var j := 0 to Length(arr[0].value) - i - 1 do 
+    for var j := i + 1 to Length(arr[0].value) - 1 do 
     begin
       write(i, j, ' ');
       if (a[k].value[i] > a[k].value[j]) then
@@ -652,9 +643,9 @@ end;
 
 procedure sortTable(current: Table);
 var
-  column   : integer;
-  sortData : array of StrArray;
-  isDesc   : boolean;
+  column: integer;
+  sortData: array of StrArray;
+  isDesc: boolean;
 begin
   column := indexConfirmed('Выберите № столбца: ', current.data);
   
@@ -674,8 +665,8 @@ end;
 
 procedure editTable();
 var
-  current : Table;
-  num     : integer;
+  current: Table;
+  num: integer;
 begin
   num := indexConfirmed('Выберите № таблицы: ', tables);
   
@@ -794,6 +785,9 @@ end;
 
 begin
   displaySplashScreen();
+  
+  userList := readAuthData();
+  
   var attempt := 0;
   while (attempt < countAttempts) and not isAuth do
   begin
