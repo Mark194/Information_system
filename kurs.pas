@@ -15,13 +15,13 @@ const
   maxLength     = 30;
 
 type
-  AuthData = record
-    login: ShortString;
-    pass: ShortString;
-    isAdmin: boolean;
-  end;
-  
   str = string[maxLength];
+  
+  AuthData = record
+    login   : str;
+    pass    : str;
+    isAdmin : boolean;
+  end;
   
   Users = array[0..countUsers] of AuthData;
   { Тип для записи в файл }
@@ -201,6 +201,11 @@ var
 
 begin
   Assign(f, 'auth.data');
+  if not fileexists('auth.data') then
+  begin
+    Writeln('Файл auth.data не найден.');
+    halt;
+  end;
   Reset(f);
   var i := 0;
   while not Eof(f) do
