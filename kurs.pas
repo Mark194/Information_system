@@ -1,12 +1,18 @@
-﻿program informationSystem;
+﻿{ Программа: Информационная система                 }
+{ Переменные:                                       }
+{ currentUser - текущий авторизованный пользователь }
+{ isAuth      - авторизован ли пользователь         }
+{ tables      - массив таблиц                       }
+{ userList    - массив пользователей                }
+program informationSystem;
 
 uses crt;
 
 const
-  countUsers = 3;
-  sec = 2000;
+  countUsers    = 3;
+  sec           = 2000;
   countAttempts = 5;
-  maxLength = 30;
+  maxLength     = 30;
 
 type
   AuthData = record
@@ -35,11 +41,14 @@ type
   end;
 
 var
-  currentUser: AuthData;
-  isAuth: boolean;
-  tables: array of Table;
-  userList: Users;
+  currentUser : AuthData;
+  isAuth      : boolean;
+  tables      : array of Table;
+  userList    : Users;
 
+{ Функция для подтверждения выбора пользователя         }
+{ Параметры: message - выводимое пользователю сообщение }
+{            value   - введённое пользователем значение }
 function actionConfirmed(message: string): boolean;
 var
   value: string;
@@ -49,6 +58,9 @@ begin
   Result := value = 'Да';
 end;
 
+{ Функция для подтверждения выбора индекса из массива              }
+{ Параметры: message - выводимое пользователю сообщение            }
+{            mas     - массив, для которого проверяется индекс     }  
 function indexConfirmed(message: string; mas: System.Array): integer;
 var
   temp: integer;
@@ -67,6 +79,9 @@ begin
   Result := temp;
 end;
 
+{ Функция для подтверждения выбранной операции                     }
+{ Параметры: min     - минимальное число                           }
+{            max     - максимально число                           }  
 function selectOperation(min: integer; max: integer): integer;
 var
   temp: integer;
@@ -84,6 +99,7 @@ begin
   Result := temp;
 end;
 
+{ Процедура для подтверждения ввода кода возврата                  }
 procedure comeBack;
 var
   temp: integer;
@@ -98,6 +114,8 @@ begin
   writeln();
 end;
 
+{ Процедура для вывода содержимого массива в виде таблицы              }
+{ Параметры: data        - данные для вывода в терминал                }
 procedure printTable(data: array of StrArray);
 var
   countColumn, countRow: integer;
@@ -106,7 +124,7 @@ begin
   write(' ':8, '|');
   
   countColumn := Length(data);
-  countRow := Length(data[0].value);
+  countRow    := Length(data[0].value);
   
   for var i := 0 to countColumn - 1 do
     write(('   Столбец ' + inttostr(i)):30, '|');
@@ -130,6 +148,8 @@ begin
   writeln();
 end;
 
+{ Функция для преобразования FileTable в Table                         }
+{ Параметры: fileTable - переменная для преобразования                 }
 function convertToTable(fileTable: FileTable): Table;
 var
   table: Table;
@@ -146,6 +166,8 @@ begin
   Result := table;
 end;
 
+{ Функция для преобразования Table в FileTable                         }
+{ Параметры: table - переменная для преобразования                     }
 function convertToFileTable(table: Table): FileTable;
 var
   fileTable: FileTable;
@@ -168,6 +190,8 @@ begin
   Result := fileTable;
 end;
 
+
+{ Функция для чтения пользователей из файла                             }
 function readAuthData(): Users;
 
 var
@@ -189,6 +213,9 @@ begin
   Result := users;
 end;
 
+{ Функция для удаления таблицы из массива таблиц по индексу          }
+{ Параметры: V       - массив таблиц                                 }
+{            Index   - индекс таблицы для удаления                   }
 function deleteElement(V: array of Table; Index: Integer): array of Table;
 var
   NewSize: Integer;
@@ -211,6 +238,9 @@ begin
   
 end;
 
+{ Функция для удаления столбца из массива столбцов по индексу          }
+{ Параметры: current       - массив столбцов                           }
+{            Index   - индекс столца для удаления                      }
 function deleteColumn(current: array of StrArray; Index: Integer): array of StrArray;
 var
   size: Integer;
@@ -235,6 +265,9 @@ begin
   end;
 end;
 
+{ Функция для удаления строки из массива строк по индексу              }
+{ Параметры: current - массив строк                                    }
+{            Index   - индекс строки для удаления                      }
 function deleteRow(current: StrArray; Index: Integer): StrArray;
 var
   size: Integer;
@@ -259,6 +292,9 @@ begin
   end;
 end;
 
+{ Функция для проверки аутентификации пользователя                     }
+{ Параметры: login - логин                                             }
+{            pass  - пароль                                            }
 function isAuthSuccess(login, pass: string): boolean;
 var
   user: AuthData;
@@ -278,6 +314,7 @@ begin
   end;
 end;
 
+{ Процедура для вывода заставки                     }
 procedure displaySplashScreen;
 begin
   writeln('┌──────────────────────────────┐');
@@ -289,6 +326,7 @@ begin
   ClrScr;
 end;
 
+{ Процедура для вывода приветственного сообщения    }
 procedure displayWelcomeMessage;
 begin
   writeln('   Добро пожаловать, ', currentUser.login);
@@ -298,6 +336,7 @@ begin
   ClrScr;
 end;
 
+{ Процедура для вывода авторизации                    }
 procedure displayAuthScreen;
 var
   login, pas: string;
@@ -324,6 +363,7 @@ begin
   ClrScr;
 end;
 
+{ Процедура для чтения таблиц из файла                }
 procedure readTables;
 var
   f: file of FileTable;
@@ -349,6 +389,7 @@ begin
   Close(f);
 end;
 
+{ Процедура для записи таблиц в файл                 }
 procedure writeTables;
 var
   f: file of FileTable;
@@ -372,6 +413,7 @@ begin
   Close(f);
 end;
 
+{ Процедура для вывода названий таблиц                 }
 procedure displayTables;
 var
   i: integer;
@@ -396,6 +438,7 @@ begin
   writeln('└──────────────────────────────┘');
 end;
 
+{ Процедура для создания таблицы                 }
 procedure createTable;
 var
   table: Table;
@@ -412,6 +455,7 @@ begin
   ClrScr;
 end;
 
+{ Процедура для удаления таблицы                 }
 procedure deleteTable;
 var
   num: integer;
@@ -429,6 +473,7 @@ begin
   ClrScr;
 end;
 
+{ Процедура для отображения имени текущей таблицы и её содержимого }
 procedure viewTable();
 var
   current: Table;
@@ -455,6 +500,8 @@ begin
   ClrScr;
 end;
 
+{ Функция для добавления столбца в таблицу                         }
+{ Параметры: current - текущая таблица                             }
 function addColumn(current: Table): Table;
 var
   last: integer;
@@ -473,6 +520,8 @@ begin
   Result := current;
 end;
 
+{ Функция для удаления столбца из таблицы                          }
+{ Параметры: current - текущая таблица                             }
 function delColumn(current: Table): Table;
 var
   num: integer;
@@ -491,6 +540,8 @@ begin
   Result := current;
 end;
 
+{ Функция для создания строки в таблице                            }
+{ Параметры: current - текущая таблица                             }
 function addRow(current: Table): Table;
 var
   last: integer;
@@ -508,6 +559,8 @@ begin
   Result := current;
 end;
 
+{ Функция для удаления строки из таблицы                           }
+{ Параметры: current - текущая таблица                             }
 function delRow(current: Table): Table;
 var
   num: integer;
@@ -530,6 +583,8 @@ begin
   Result := current;
 end;
 
+{ Функция для добавления значения в ячейку таблицы                 }
+{ Параметры: current - текущая таблица                             }
 function insertValue(current: Table): Table;
 var
   row, column: integer;
@@ -562,6 +617,8 @@ begin
   Result := current;
 end;
 
+{ Процедура для поиска значения в таблице                          }
+{ Параметры: current - текущая таблица                             }
 procedure findValue(current: Table);
 var
   value: string;
@@ -587,34 +644,10 @@ begin
   comeBack();
 end;
 
+{ Функция для сортировки по возрастанию                            }
+{ Параметры: array - массив для сортировки                         }
+{            k     - номер столбца, по которому сортируем          }
 function sortDescending(arr: array of StrArray; k: integer): array of StrArray;
-var
-  temp: str;
-begin
-  var a := copy(arr);
-  for var i := 0 to Length(arr) - 1 do
-    a[i].value := copy(arr[i].value);
-  
-  
-  for var i := 0 to Length(arr[0].value) - 1 do 
-    for var j := i + 1 to Length(arr[0].value) - i - 1 do 
-    begin
-      write(i, j, ' ');
-      if (a[k].value[i] < a[k].value[j]) then
-      begin
-        for var d := 0 to Length(arr) - 1 do
-        begin
-          temp := a[d].value[i];
-          a[d].value[i] := a[d].value[j];
-          a[d].value[j] := temp;
-        end;
-      end;
-    end;
-  
-  Result := a;
-end;
-
-function sortAscending(arr: array of StrArray; k: integer): array of StrArray;
 var
   temp: str;
 begin
@@ -641,6 +674,38 @@ begin
   Result := a;
 end;
 
+{ Функция для сортировки по убыванию                               }
+{ Параметры: array - массив для сортировки                         }
+{            k     - номер столбца, по которому сортируем          }
+function sortAscending(arr: array of StrArray; k: integer): array of StrArray;
+var
+  temp: str;
+begin
+  var a := copy(arr);
+  for var i := 0 to Length(arr) - 1 do
+    a[i].value := copy(arr[i].value);
+  
+  
+  for var i := 0 to Length(arr[0].value) - 1 do 
+    for var j := i + 1 to Length(arr[0].value) - 1 do 
+    begin
+      write(i, j, ' ');
+      if (a[k].value[i] < a[k].value[j]) then
+      begin
+        for var d := 0 to Length(arr) - 1 do
+        begin
+          temp := a[d].value[i];
+          a[d].value[i] := a[d].value[j];
+          a[d].value[j] := temp;
+        end;
+      end;
+    end;
+  
+  Result := a;
+end;
+
+{ Процедура для сортировки текущей таблицы                         }
+{ Параметры: current - текущая таблица                             }
 procedure sortTable(current: Table);
 var
   column: integer;
@@ -663,6 +728,7 @@ begin
   comeBack();
 end;
 
+{ Процедура для изменения ячейки таблицы                         }
 procedure editTable();
 var
   current: Table;
@@ -721,6 +787,7 @@ begin
   end;
 end;
 
+{ Процедура для вывода меню админа                        }
 procedure displayAdminMenu;
 var
   oper: integer;
@@ -758,6 +825,7 @@ begin
   end;
 end;
 
+{ Процедура для вывода меню пользователя                        }
 procedure displayUserMenu;
 var
   oper: integer;
