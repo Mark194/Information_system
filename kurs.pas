@@ -736,7 +736,7 @@ begin
   comeBack();
 end;
 
-{ Процедура для изменения ячейки таблицы                         }
+{ Процедура для изменения таблицы                         }
 procedure editTable();
 var
   current: Table;
@@ -788,6 +788,57 @@ begin
       5: current := insertValue(current);
       6: findValue(current);
       7: sortTable(current);
+    end;
+    
+    tables[num] := current;
+    ClrScr;
+  end;
+end;
+
+{ Процедура для изменения таблицы                         }
+procedure editUserTable();
+var
+  current: Table;
+  num: integer;
+begin
+  num := indexConfirmed('Выберите № таблицы: ', tables);
+  
+  ClrScr;
+  current := tables[num];
+  while true do
+  begin
+    
+    writeln('┌──────────────────────────────┐');
+    writeln('│                              │');
+    writeln('│  Таблица "', current.name, '"');
+    writeln('│                              │');
+    writeln('└──────────────────────────────┘');
+    
+    writeln('┌──────────────────────────────┐');
+    writeln('│                              │');
+    writeln('│         Операции             │');
+    writeln('│                              │');
+    writeln('│  0 - Возврат в меню          │');
+    writeln('│  1 - Изменить ячейку         │');
+    writeln('│  2 - Поиск значения          │');
+    writeln('│  3 - Сортировка по столбцу   │');
+    writeln('│                              │');
+    writeln('└──────────────────────────────┘');
+    
+    var countColumn := Length(current.data);
+    
+    if (countColumn <> 0) then
+      printTable(current.data);
+    
+    var oper: integer;
+    
+    oper := selectOperation(0, 3);
+    
+    case oper of
+      0: begin ClrScr; exit; end;
+      1: current := insertValue(current);
+      2: findValue(current);
+      3: sortTable(current);
     end;
     
     tables[num] := current;
@@ -853,7 +904,7 @@ begin
     1: viewTable();
     2: 
       begin
-        editTable();
+        editUserTable();
         writeTables();
       end;
   end;
