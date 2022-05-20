@@ -6,7 +6,7 @@
 { userList    - массив пользователей                }
 program informationSystem;
 
-uses crt;
+uses crt, Graphic;
 
 const
   countUsers    = 3;
@@ -15,7 +15,6 @@ const
   maxLength     = 30;
 
 type
-  str = string[maxLength];
   
   AuthData = record
     login   : str;
@@ -30,10 +29,6 @@ type
     countRow: integer;
     countColumn: integer;
     data: array [0..100, 0..100] of str;
-  end;
-  StrArray = record
-    isDigit: boolean;
-    value: array of str;
   end;
   Table = record
     name: str;
@@ -79,26 +74,6 @@ begin
   Result := temp;
 end;
 
-{ Функция для подтверждения выбранной операции                     }
-{ Параметры: min     - минимальное число                           }
-{            max     - максимально число                           }  
-function selectOperation(min: integer; max: integer): integer;
-var
-  temp: integer;
-  line: string;
-  code: integer;
-begin
-  code := 0;
-  repeat
-    write('  Выберите действие: ');
-    Readln(line);
-    VAL(line, temp, code);
-    if code <> 0 then writeln('Должно быть число'); 
-  until (code = 0) and ((temp >= min) and (temp <= max));
-  
-  Result := temp;
-end;
-
 { Процедура для подтверждения ввода кода возврата                  }
 procedure comeBack;
 var
@@ -111,40 +86,6 @@ begin
     Readln(answer);
     VAL(answer, temp, code);
   until (code = 0) and (temp = 0);
-  writeln();
-end;
-
-{ Процедура для вывода содержимого массива в виде таблицы              }
-{ Параметры: data        - данные для вывода в терминал                }
-procedure printTable(data: array of StrArray);
-var
-  countColumn, countRow: integer;
-begin
-  writeln();
-  write(' ':8, '|');
-  
-  countColumn := Length(data);
-  countRow    := Length(data[0].value);
-  
-  for var i := 0 to countColumn - 1 do
-    write(('   Столбец ' + inttostr(i)):30, '|');
-  writeln();
-  
-  write('+', '-' * 7, '+');
-  for var i := 0 to countColumn - 1 do
-    write('-' * 30, '+');
-  writeln();
-  
-  for var i := 0 to countRow - 1 do
-  begin
-    for var j := 0 to countColumn - 1 do
-    begin
-      if j = 0 then
-        write('| ', i:5, ' |');
-      write(data[j].value[i]:30, '|'); 
-    end;
-    writeln();
-  end;
   writeln();
 end;
 
@@ -319,42 +260,13 @@ begin
   end;
 end;
 
-{ Процедура для вывода заставки                     }
-procedure displaySplashScreen;
-begin
-  writeln('┌──────────────────────────────┐');
-  writeln('│                              │');
-  writeln('│    Информационная система    │');
-  writeln('│                              │');
-  writeln('│  Выполнил: студент гр. 1413  │');
-  writeln('│       Конов Александр        │');
-  writeln('│                              │');
-  writeln('└──────────────────────────────┘');
-  delay(sec);
-  ClrScr;
-end;
-
-{ Процедура для вывода приветственного сообщения    }
-procedure displayWelcomeMessage;
-begin
-  writeln('   Добро пожаловать, ', currentUser.login);
-  writeln();
-  writeln('   Загрузка базы данных...');
-  delay(sec);
-  ClrScr;
-end;
-
 { Процедура для вывода авторизации                    }
 procedure displayAuthScreen;
 var
   login, pas: string;
 begin
-  writeln('┌──────────────────────────────┐');
-  writeln('│                              │');
-  writeln('│         Авторизация          │');
-  writeln('│                              │');
-  writeln('└──────────────────────────────┘');
-  write('  Логин:  ');
+  displayAuth();
+  write('  Логин: ');
   Readln(login);
   write('  Пароль: ');
   Readln(pas);
@@ -426,10 +338,10 @@ procedure displayTables;
 var
   i: integer;
 begin
-  writeln('┌──────────────────────────────┐');
-  writeln('│                              │');
-  writeln('│           Таблицы            │');
-  writeln('│                              │');
+  writeln('┌────────────────────────────────────┐');
+  writeln('│                                    │');
+  writeln('│             Таблицы                │');
+  writeln('│                                    │');
   
   if (Length(tables) = 0) then
     writeln('│  Не создано ни одной таблицы │')
@@ -439,11 +351,11 @@ begin
     for i := 0 to Length(tables) - 1 do
     begin
       table := tables[i];
-      writeln('| ', i, ' - ', table.name);
+      Writeln('| ',i, ' - ', table.name, ' ' * (30 - Length(table.name)), ' │');
     end;
   end;
-  writeln('│                              │');
-  writeln('└──────────────────────────────┘');
+  writeln('│                                    │');
+  writeln('└────────────────────────────────────┘');
 end;
 
 { Процедура для создания таблицы                 }
@@ -493,11 +405,7 @@ begin
   ClrScr;
   current := tables[num];
   
-  writeln('┌──────────────────────────────┐');
-  writeln('│                              │');
-  writeln('│  Таблица "', current.name, '"');
-  writeln('│                              │');
-  writeln('└──────────────────────────────┘');
+  displayTableName(current.name);
   
   var countRow := Length(current.data);
   
@@ -749,26 +657,20 @@ begin
   while true do
   begin
     
-    writeln('┌──────────────────────────────┐');
-    writeln('│                              │');
-    writeln('│  Таблица "', current.name, '"');
-    writeln('│                              │');
-    writeln('└──────────────────────────────┘');
+    displayTableName(current.name);
     
-    writeln('┌──────────────────────────────┐');
-    writeln('│                              │');
-    writeln('│         Операции             │');
-    writeln('│                              │');
-    writeln('│  0 - Возврат в меню          │');
-    writeln('│  1 - Добавить столбец        │');
-    writeln('│  2 - Удалить столбец         │');
-    writeln('│  3 - Добавить строку         │');
-    writeln('│  4 - Удалить строку          │');
-    writeln('│  5 - Изменить ячейку         │');
-    writeln('│  6 - Поиск значения          │');
-    writeln('│  7 - Сортировка по столбцу   │');
-    writeln('│                              │');
-    writeln('└──────────────────────────────┘');
+
+    
+    var actions: array of string = ('Возврат в меню', 
+                                 'Добавить столбец', 
+                                 'Удалить столбец ', 
+                                 'Добавить строку', 
+                                 'Удалить строку',
+                                 'Изменить ячейку',
+                                 'Поиск значения',
+                                 'Сортировка по столбцу');
+    
+    displayMenu( actions );
     
     var countColumn := Length(current.data);
     
@@ -777,7 +679,7 @@ begin
     
     var oper: integer;
     
-    oper := selectOperation(0, 7);
+    oper := selectOperation(actions);
     
     case oper of
       0: begin ClrScr; exit; end;
@@ -814,16 +716,12 @@ begin
     writeln('│                              │');
     writeln('└──────────────────────────────┘');
     
-    writeln('┌──────────────────────────────┐');
-    writeln('│                              │');
-    writeln('│         Операции             │');
-    writeln('│                              │');
-    writeln('│  0 - Возврат в меню          │');
-    writeln('│  1 - Изменить ячейку         │');
-    writeln('│  2 - Поиск значения          │');
-    writeln('│  3 - Сортировка по столбцу   │');
-    writeln('│                              │');
-    writeln('└──────────────────────────────┘');
+        var actions: array of string = ('Возврат в меню', 
+                                 'Изменить ячейку', 
+                                 'Поиск значения', 
+                                 'Сортировка по столбцу');
+    
+    displayMenu( actions );
     
     var countColumn := Length(current.data);
     
@@ -832,7 +730,7 @@ begin
     
     var oper: integer;
     
-    oper := selectOperation(0, 3);
+    oper := selectOperation(actions);
     
     case oper of
       0: begin ClrScr; exit; end;
@@ -851,32 +749,29 @@ procedure displayAdminMenu;
 var
   oper: integer;
 begin
-  writeln('┌──────────────────────────────┐');
-  writeln('│                              │');
-  writeln('│    Операции с таблицами      │');
-  writeln('│                              │');
-  writeln('│  1 - Просмотреть             │');
-  writeln('│  2 - Создать                 │');
-  writeln('│  3 - Редактировать           │');
-  writeln('│  4 - Удалить                 │');
-  writeln('│                              │');
-  writeln('└──────────────────────────────┘');
   
-  oper := selectOperation(1, 4);
+          var actions: array of string = ('Просмотреть', 
+                                 'Создать', 
+                                 'Редактировать', 
+                                 'Удалить');
+    
+    displayMenu( actions );
+  
+  oper := selectOperation( actions );
   
   case oper of
-    1: viewTable();
-    2: 
+    0: viewTable();
+    1: 
       begin
         createTable();
         writeTables();
       end;
-    3: 
+    2: 
       begin
         editTable();
         writeTables();
       end;
-    4: 
+    3: 
       begin
         deleteTable();
         writeTables();
@@ -889,20 +784,16 @@ procedure displayUserMenu;
 var
   oper: integer;
 begin
-  writeln('┌──────────────────────────────┐');
-  writeln('│                              │');
-  writeln('│    Операции с таблицами      │');
-  writeln('│                              │');
-  writeln('│  1 - Просмотреть             │');
-  writeln('│  2 - Редактировать           │');
-  writeln('│                              │');
-  writeln('└──────────────────────────────┘');
+          var actions: array of string = ( 'Просмотреть',
+                                 'Редактировать');
+    
+  displayMenu( actions );
   
-  oper := selectOperation(1, 2);
+  oper := selectOperation( actions );
   
   case oper of
-    1: viewTable();
-    2: 
+    0: viewTable();
+    1: 
       begin
         editUserTable();
         writeTables();
@@ -928,7 +819,7 @@ begin
     exit;
   end;
   
-  displayWelcomeMessage();
+  displayWelcomeMessage(currentUser.login);
   
   readTables();
   
