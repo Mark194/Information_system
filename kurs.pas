@@ -399,21 +399,58 @@ var
   current: Table;
   oper: integer;
   num: integer;
+  startRow: integer;
+  startColumn: integer;
+  len : integer;
 begin
   num := indexConfirmed('Выберите № таблицы: ', tables);
   
   ClrScr;
   current := tables[num];
   
-  displayTableName(current.name);
+  
   
   var countRow := Length(current.data);
   
-  if (countRow <> 0) then
-    printTable(current.data);
+  startRow := 0;
   
-  comeBack();
-  ClrScr;
+  startColumn := 0;
+  
+  len := 3;
+  
+  while true do
+  begin
+    
+    displayTableName(current.name);
+    
+    if (countRow <> 0) then
+      printPartTable(current.data, startRow, startColumn, len);
+    
+    var actions: array of string = ('↑', 
+                                   '←', 
+                                   '→', 
+                                   '↓', 
+                                   'Возврат');
+    
+    displayMenu( actions );
+    
+    oper := selectOperation( actions );
+    
+    case oper of
+      0: startRow := startRow - len;
+      1: startColumn := startColumn - len;
+      2: startColumn := startColumn + len;
+      3: startRow := startRow + len;
+      4: begin ClrScr; exit; end;
+    end;
+    
+    if startRow < 0 then startRow := 0;
+    
+    if startColumn < 0 then startColumn := 0;
+    
+//    comeBack();
+    ClrScr;
+    end;
 end;
 
 { Функция для добавления столбца в таблицу                         }

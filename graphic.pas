@@ -14,7 +14,7 @@ procedure displayTableName(name: string);
 procedure displayMenu(actions: array of string);
 function selectOperation( actions: array of string ): integer;
 procedure printTable(data: array of StrArray);
-
+procedure printPartTable(data: array of StrArray; row, column, len : integer);
 
 
 implementation
@@ -190,6 +190,50 @@ begin
     for var j := 0 to countColumn - 1 do
     begin
       if j = 0 then
+        write('| ', i:5, ' |');
+      write(data[j].value[i]:30, '|'); 
+    end;
+    writeln();
+  end;
+  writeln();
+  indexEnd := WhereY();
+end;
+
+{ Процедура для вывода части содержимого массива в виде таблицы        }
+{ Параметры: data        - данные для вывода в терминал                }
+{            row         - начальная строка                            }
+{            column      - начальный столбец                           }
+{            len         - длина                                       }
+procedure printPartTable(data: array of StrArray; row, column, len : integer);
+var
+  countColumn, countRow: integer;
+begin
+  writeln();
+  write(' ':8, '|');
+  
+  countColumn := Length(data);
+  countRow    := Length(data[0].value);
+  
+  if (row + len) < countRow then
+    countRow := row + len;
+  
+  if (column + len) < countColumn then
+    countColumn := column + len;
+  
+  for var i := column to countColumn - 1 do
+    write(('   Столбец ' + inttostr(i)):30, '|');
+  writeln();
+  
+  write('+', '-' * 7, '+');
+  for var i := column to countColumn - 1 do
+    write('-' * 30, '+');
+  writeln();
+  
+  for var i := row to countRow - 1 do
+  begin
+    for var j := column to countColumn - 1 do
+    begin
+      if j = column then
         write('| ', i:5, ' |');
       write(data[j].value[i]:30, '|'); 
     end;
