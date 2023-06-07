@@ -686,18 +686,21 @@ procedure editTable();
 var
   current: Table;
   num: integer;
+  startRow : integer;
+  startColumn : integer;
+  len : integer;
 begin
   num := indexConfirmed('Выберите № таблицы: ', tables);
   
   ClrScr;
   current := tables[num];
-  while true do
-  begin
-    
-    displayTableName(current.name);
-    
+  
+  startRow := 0;
+  
+  startColumn := 0;
+  
+  len := 3;
 
-    
     var actions: array of string = ('Возврат в меню', 
                                  'Добавить столбец', 
                                  'Удалить столбец ', 
@@ -705,16 +708,28 @@ begin
                                  'Удалить строку',
                                  'Изменить ячейку',
                                  'Поиск значения',
-                                 'Сортировка по столбцу');
+                                 'Сортировка по столбцу',
+                                 '↑', 
+                                 '←', 
+                                 '→', 
+                                 '↓'
+                                 );
+  
+  while true do
+  begin
+    
+    displayTableName(current.name);
     
     displayMenu( actions );
     
     var countColumn := Length(current.data);
     
     if (countColumn <> 0) then
-      printTable(current.data);
+      printPartTable(current.data, startRow, startColumn, len);
     
     var oper: integer;
+    
+    
     
     oper := selectOperation(actions);
     
@@ -727,7 +742,15 @@ begin
       5: current := insertValue(current);
       6: findValue(current);
       7: sortTable(current);
+      8: startRow := startRow - len;
+      9: startColumn := startColumn - len;
+      10: startColumn := startColumn + len;
+      11: startRow := startRow + len;
     end;
+    
+    if startRow < 0 then startRow := 0;
+    
+    if startColumn < 0 then startColumn := 0;
     
     tables[num] := current;
     ClrScr;

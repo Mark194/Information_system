@@ -214,10 +214,10 @@ begin
   countColumn := Length(data);
   countRow    := Length(data[0].value);
   
-  if (row + len) < countRow then
+  if (row + len) <= countRow then
     countRow := row + len;
   
-  if (column + len) < countColumn then
+  if (column + len) <= countColumn then
     countColumn := column + len;
   
   for var i := column to countColumn - 1 do
